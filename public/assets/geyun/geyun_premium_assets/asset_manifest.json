@@ -1,0 +1,127 @@
+{
+  "branch_photos": [
+    {
+      "name": "泉州分公司",
+      "clean_16x9": "01_branch_photos_refined/branch_quanzhou_16x9_clean.jpg",
+      "card_4x3": "01_branch_photos_refined/branch_quanzhou_card_4x3.jpg",
+      "dark_hero": "02_branch_photos_dark_overlay/branch_quanzhou_dark_hero.jpg",
+      "usage": "分公司照片墙、服务网络、关于歌运"
+    },
+    {
+      "name": "深圳分公司",
+      "clean_16x9": "01_branch_photos_refined/branch_shenzhen_16x9_clean.jpg",
+      "card_4x3": "01_branch_photos_refined/branch_shenzhen_card_4x3.jpg",
+      "dark_hero": "02_branch_photos_dark_overlay/branch_shenzhen_dark_hero.jpg",
+      "usage": "分公司照片墙、服务网络、关于歌运"
+    },
+    {
+      "name": "太原分公司",
+      "clean_16x9": "01_branch_photos_refined/branch_taiyuan_16x9_clean.jpg",
+      "card_4x3": "01_branch_photos_refined/branch_taiyuan_card_4x3.jpg",
+      "dark_hero": "02_branch_photos_dark_overlay/branch_taiyuan_dark_hero.jpg",
+      "usage": "分公司照片墙、服务网络、关于歌运"
+    },
+    {
+      "name": "武汉分公司",
+      "clean_16x9": "01_branch_photos_refined/branch_wuhan_16x9_clean.jpg",
+      "card_4x3": "01_branch_photos_refined/branch_wuhan_card_4x3.jpg",
+      "dark_hero": "02_branch_photos_dark_overlay/branch_wuhan_dark_hero.jpg",
+      "usage": "分公司照片墙、服务网络、关于歌运"
+    },
+    {
+      "name": "长沙分公司",
+      "clean_16x9": "01_branch_photos_refined/branch_changsha_16x9_clean.jpg",
+      "card_4x3": "01_branch_photos_refined/branch_changsha_card_4x3.jpg",
+      "dark_hero": "02_branch_photos_dark_overlay/branch_changsha_dark_hero.jpg",
+      "usage": "分公司照片墙、服务网络、关于歌运"
+    }
+  ],
+  "video_frames": [
+    {
+      "source": "2026-05-26 134644(1).mp4.jpg",
+      "clean": "03_video_frames_refined/01_2026-05-26_1346441_clean.jpg",
+      "dark_hero": "04_hero_backgrounds/01_2026-05-26_1346441_dark_hero.jpg",
+      "usage": "首页首屏、仓储实力、作业现场背景"
+    },
+    {
+      "source": "2026-05-26 135950(2).mp4.jpg",
+      "clean": "03_video_frames_refined/02_2026-05-26_1359502_clean.jpg",
+      "dark_hero": "04_hero_backgrounds/02_2026-05-26_1359502_dark_hero.jpg",
+      "usage": "首页首屏、仓储实力、作业现场背景"
+    },
+    {
+      "source": "2026-05-26 140018(1).mp4.jpg",
+      "clean": "03_video_frames_refined/03_2026-05-26_1400181_clean.jpg",
+      "dark_hero": "04_hero_backgrounds/03_2026-05-26_1400181_dark_hero.jpg",
+      "usage": "首页首屏、仓储实力、作业现场背景"
+    },
+    {
+      "source": "2026-05-26 152020(2).mp4.jpg",
+      "clean": "03_video_frames_refined/04_2026-05-26_1520202_clean.jpg",
+      "dark_hero": "04_hero_backgrounds/04_2026-05-26_1520202_dark_hero.jpg",
+      "usage": "首页首屏、仓储实力、作业现场背景"
+    }
+  ],
+  "hero_backgrounds": [
+    {
+      "file": "04_hero_backgrounds/01_2026-05-26_1346441_dark_hero.jpg",
+      "source": "2026-05-26 134644(1).mp4.jpg",
+      "usage": "首页首屏 / 仓储实力页背景"
+    },
+    {
+      "file": "04_hero_backgrounds/02_2026-05-26_1359502_dark_hero.jpg",
+      "source": "2026-05-26 135950(2).mp4.jpg",
+      "usage": "首页首屏 / 仓储实力页背景"
+    },
+    {
+      "file": "04_hero_backgrounds/03_2026-05-26_1400181_dark_hero.jpg",
+      "source": "2026-05-26 140018(1).mp4.jpg",
+      "usage": "首页首屏 / 仓储实力页背景"
+    },
+    {
+      "file": "04_hero_backgrounds/04_2026-05-26_1520202_dark_hero.jpg",
+      "source": "2026-05-26 152020(2).mp4.jpg",
+      "usage": "首页首屏 / 仓储实力页背景"
+    },
+    {
+      "file": "02_branch_photos_dark_overlay/branch_quanzhou_dark_hero.jpg",
+      "source": "泉州分公司",
+      "usage": "服务网络页背景 / 分公司详情背景"
+    },
+    {
+      "file": "02_branch_photos_dark_overlay/branch_shenzhen_dark_hero.jpg",
+      "source": "深圳分公司",
+      "usage": "服务网络页背景 / 分公司详情背景"
+    },
+    {
+      "file": "02_branch_photos_dark_overlay/branch_taiyuan_dark_hero.jpg",
+      "source": "太原分公司",
+      "usage": "服务网络页背景 / 分公司详情背景"
+    },
+    {
+      "file": "02_branch_photos_dark_overlay/branch_wuhan_dark_hero.jpg",
+      "source": "武汉分公司",
+      "usage": "服务网络页背景 / 分公司详情背景"
+    },
+    {
+      "file": "02_branch_photos_dark_overlay/branch_changsha_dark_hero.jpg",
+      "source": "长沙分公司",
+      "usage": "服务网络页背景 / 分公司详情背景"
+    }
+  ],
+  "graphics": [
+    {
+      "file": "05_web_graphics_svg/global_route_dark.svg",
+      "usage": "全球航线地图背景"
+    },
+    {
+      "file": "05_web_graphics_svg/data_dashboard_bg.svg",
+      "usage": "数据驾驶舱背景"
+    },
+    {
+      "file": "05_web_graphics_svg/route_card_bg.svg",
+      "usage": "美线渠道卡片背景"
+    }
+  ],
+  "data_file": "06_data_for_codex/siteData.json"
+}

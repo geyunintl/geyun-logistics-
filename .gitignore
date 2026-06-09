@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Vercel
+.vercel
+
+# Claude session data
+.claude/
+
+# Dev screenshots & temp files in root only
+/*.png
+/*.jpg
+/screenshots/
+/asset-inspect/
+
+# Large video files — host on CDN, not git
+public/assets/geyun/videos/*.mp4
+
+# Raw / unprocessed assets — too large for git
+public/assets/geyun/real/
+public/assets/geyun/reference/
+public/assets/geyun/hero/
+public/assets/geyun/geyun_premium_assets/素材预览_contact_sheet.jpg
+
+# Temp video frame thumbnails extracted during dev
+public/assets/frame-*.jpg
+
+# Root-level assets folder (dev temp)
+/assets/
+
+# Legacy prototype
+index.html
+style.css
+
+# TS build info
+tsconfig.tsbuildinfo
