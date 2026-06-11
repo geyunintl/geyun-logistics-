@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SectionHeading } from '@/components/ui/SectionHeading';
@@ -15,9 +16,9 @@ const PLANS: Record<string, Record<string, PlanData>> = {
   美国: {
     平衡方案: {
       channels: [
-        { name: '美线专线海运', time: '22–30 天', badge: '推荐', color: 'cyan' },
+        { name: '美线普通专线海运', time: '20–35 天', badge: '推荐', color: 'cyan' },
         { name: 'FBA 海运头程', time: '25–35 天', badge: '稳定', color: 'slate' },
-        { name: '美线快船专线', time: '18–22 天', badge: '时效保障', color: 'amber' },
+        { name: '美线快船专线', time: '12–19 天', badge: '时效保障', color: 'amber' },
       ],
       warehouses: ['洛杉矶仓', '新泽西仓', 'Amazon FBA'],
       hint: '支持 FBA 及海外仓两种交货方式，舱位稳定，义乌直发。',
@@ -187,46 +188,16 @@ const CARGO_TYPES = ['普货（非带电）', '带电/锂电池', '大件货', '
 const PRIORITIES  = ['平衡方案', '时效优先', '成本优先'] as const;
 
 /* ─── QR placeholder (replace with real image when ready) ───────────── */
-function QrPlaceholder() {
+function QrCode() {
   return (
-    <div className="flex h-[106px] w-[106px] shrink-0 items-center justify-center rounded-2xl border border-dashed border-cyan-300/25 bg-slate-900/60 p-2.5">
-      {/* Simple SVG QR-like pattern */}
-      <svg viewBox="0 0 80 80" className="h-full w-full text-cyan-300/40" fill="currentColor">
-        {/* TL finder */}
-        <rect x="4"  y="4"  width="24" height="24" rx="2" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="10" y="10" width="12" height="12" rx="1" />
-        {/* TR finder */}
-        <rect x="52" y="4"  width="24" height="24" rx="2" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="58" y="10" width="12" height="12" rx="1" />
-        {/* BL finder */}
-        <rect x="4"  y="52" width="24" height="24" rx="2" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="10" y="58" width="12" height="12" rx="1" />
-        {/* Data modules */}
-        <rect x="34" y="4"  width="6" height="6" rx="1" />
-        <rect x="42" y="4"  width="6" height="6" rx="1" />
-        <rect x="34" y="12" width="6" height="6" rx="1" />
-        <rect x="34" y="20" width="6" height="6" rx="1" />
-        <rect x="42" y="20" width="6" height="6" rx="1" />
-        <rect x="4"  y="34" width="6" height="6" rx="1" />
-        <rect x="12" y="34" width="6" height="6" rx="1" />
-        <rect x="4"  y="42" width="6" height="6" rx="1" />
-        <rect x="20" y="42" width="6" height="6" rx="1" />
-        <rect x="34" y="34" width="6" height="6" rx="1" />
-        <rect x="42" y="34" width="6" height="6" rx="1" />
-        <rect x="50" y="34" width="6" height="6" rx="1" />
-        <rect x="58" y="34" width="6" height="6" rx="1" />
-        <rect x="34" y="42" width="6" height="6" rx="1" />
-        <rect x="50" y="42" width="6" height="6" rx="1" />
-        <rect x="66" y="42" width="6" height="6" rx="1" />
-        <rect x="34" y="50" width="6" height="6" rx="1" />
-        <rect x="42" y="58" width="6" height="6" rx="1" />
-        <rect x="50" y="50" width="6" height="6" rx="1" />
-        <rect x="58" y="58" width="6" height="6" rx="1" />
-        <rect x="66" y="50" width="6" height="6" rx="1" />
-        <rect x="34" y="66" width="6" height="6" rx="1" />
-        <rect x="50" y="66" width="6" height="6" rx="1" />
-        <rect x="66" y="66" width="6" height="6" rx="1" />
-      </svg>
+    <div className="relative shrink-0 h-[106px] w-[106px] overflow-hidden rounded-2xl border border-cyan-300/20 bg-white">
+      <Image
+        src="/assets/geyun/wechat-qr.png"
+        alt="微信二维码"
+        fill
+        className="object-cover"
+        sizes="106px"
+      />
     </div>
   );
 }
@@ -416,10 +387,13 @@ export function QuoteGenerator() {
             <div className="mt-6 border-t border-white/[0.07] pt-5">
               <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">直联顾问 · WeChat</p>
               <div className="flex items-start gap-4">
-                {/* QR placeholder — replace with <Image src="/assets/geyun/wechat-qr.png" ... /> when ready */}
-                <QrPlaceholder />
+                <QrCode />
                 <div className="flex flex-col justify-center gap-2 pt-1">
                   <p className="font-black text-white text-sm">扫码添加专属顾问</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    <span className="text-xs font-bold text-amber-300">📞 美国：+1 (208) 380-8736</span>
+                  </div>
                   {[
                     '通常 2 小时内响应',
                     '免费方案咨询',

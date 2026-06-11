@@ -61,7 +61,7 @@ const BRANCHES = [
 const STATS = [
   { label: '调度核心', value: 'YIWU HQ' },
   { label: '全国布局', value: '6 城' },
-  { label: '仓储规模', value: '12000㎡' },
+  { label: '仓储规模', value: '30000㎡' },
   { label: '响应速度', value: '24H' },
   { label: '网络协同', value: '多地联动' },
   { label: '核心航线', value: '美线专线' },

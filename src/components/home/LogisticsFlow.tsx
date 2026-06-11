@@ -10,7 +10,7 @@ const STEPS = [
   { id: 4, label: '订舱出运',     en: 'DEPARTURE', x: 560,  y: 218, above: true,  desc: '海运/空运订舱、报关、装柜全程监装出运' },
   { id: 5, label: '海外清关',     en: 'CUSTOMS',   x: 724,  y: 266, above: false, desc: '目的港清关、税单处理、异常情况快速应对' },
   { id: 6, label: '海外仓/卡派',  en: 'DELIVERY',  x: 872,  y: 312, above: true,  desc: '卡车派送或海外仓收货上架、本土分发协同' },
-  { id: 7, label: 'FBA 签收',     en: 'RECEIVED',  x: 1020, y: 362, above: false, desc: '亚马逊入仓确认，全链路节点可视化追踪签收' },
+  { id: 7, label: 'FBA 签收',     en: 'RECEIVED',  x: 1020, y: 362, above: false, desc: 'FBA/住宅地址/商业地址签收' },
 ];
 
 /* ─── SVG constants ─────────────────────────────────────────────────── */
