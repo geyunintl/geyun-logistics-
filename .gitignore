@@ -45,7 +45,7 @@ public/assets/geyun/videos/*.mp4
 # Raw / unprocessed assets — too large for git
 public/assets/geyun/real/
 public/assets/geyun/reference/
-public/assets/geyun/hero/
+# hero-clean-bg.png is only 2MB, kept in git (no longer excluded)
 public/assets/geyun/geyun_premium_assets/素材预览_contact_sheet.jpg
 
 # Temp video frame thumbnails extracted during dev
