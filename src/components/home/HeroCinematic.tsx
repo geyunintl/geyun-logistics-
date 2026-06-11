@@ -19,7 +19,7 @@ const heroStats: StatItem[] = [
   { value: 2017,   suffix: '',    label: '公司成立',     icon: '◉' },
   { value: 1000,   suffix: '万',  label: '注册资金',     icon: '▣' },
   { value: 12,     suffix: '+',   label: '分公司布局',   icon: '⌂' },
-  { value: 12000,  suffix: '㎡',  label: '仓储面积',     icon: '▤' },
+  { value: 30000,  suffix: '㎡',  label: '仓储面积',     icon: '▤' },
   { value: 200,    suffix: '+',   label: '海运专线',     icon: '⇄' },
   { value: 200000, suffix: 'ft²', label: '洛杉矶海外仓', icon: '⬢' },
 ];
