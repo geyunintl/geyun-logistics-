@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 type Color = 'cyan' | 'amber' | 'slate';
@@ -204,6 +205,7 @@ function QrCode() {
 
 /* ─── Component ──────────────────────────────────────────────────────── */
 export function QuoteGenerator() {
+  const { lang, t } = useLang();
   const [country,    setCountry]    = useState('美国');
   const [cargoType,  setCargoType]  = useState('普货（非带电）');
   const [volume,     setVolume]     = useState('');
@@ -214,7 +216,15 @@ export function QuoteGenerator() {
 
   const plan = PLANS[country]?.[priority] ?? DEFAULT_PLAN;
   const planKey = `${country}-${priority}`;
+  /* hasElectric: cargoType state is always Chinese key */
   const hasElectric = cargoType.includes('带电');
+
+  /* Build display values for plan panel */
+  const displayCountry  = t.quote.countryMap[country]   ?? country;
+  const displayPriority = t.quote.priorityMap[priority] ?? priority;
+  const planHint = lang === 'zh'
+    ? plan.hint
+    : (t.quote.planData.hints[planKey] ?? t.quote.planData.hints['default'] ?? plan.hint);
 
   return (
     <section id="quote" className="container-x py-28">
@@ -227,9 +237,9 @@ export function QuoteGenerator() {
           {/* ── Left: Form ── */}
           <div>
             <SectionHeading
-              eyebrow="INSTANT QUOTE"
-              title="快速询价"
-              description="选择目的地与货物信息，右侧方案即时更新匹配。"
+              eyebrow={t.quote.eyebrow}
+              title={t.quote.title}
+              description={t.quote.description}
             />
 
             <form
@@ -238,26 +248,26 @@ export function QuoteGenerator() {
             >
               {/* 目的国家 */}
               <label>
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">目的国家</span>
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.country}</span>
                 <select className={SELECT_CLS} value={country} onChange={(e) => { setCountry(e.target.value); setSubmitted(false); }}>
-                  {COUNTRIES.map((c) => <option key={c}>{c}</option>)}
+                  {COUNTRIES.map((c, i) => <option key={c} value={c}>{t.quote.countries[i] ?? c}</option>)}
                 </select>
               </label>
 
               {/* 货物类型 */}
               <label>
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">货物类型</span>
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.cargo}</span>
                 <select className={SELECT_CLS} value={cargoType} onChange={(e) => setCargoType(e.target.value)}>
-                  {CARGO_TYPES.map((c) => <option key={c}>{c}</option>)}
+                  {CARGO_TYPES.map((c, i) => <option key={c} value={c}>{t.quote.cargoTypes[i] ?? c}</option>)}
                 </select>
               </label>
 
               {/* 预计货量 */}
               <label className="md:col-span-2">
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">预计货量</span>
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.volume}</span>
                 <input
                   className={INPUT_CLS}
-                  placeholder="如：10 CBM / 500 KG / 1 柜"
+                  placeholder={t.quote.fields.volumePlaceholder}
                   value={volume}
                   onChange={(e) => setVolume(e.target.value)}
                 />
@@ -265,9 +275,9 @@ export function QuoteGenerator() {
 
               {/* 方案偏好 — pill group */}
               <div className="md:col-span-2">
-                <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">方案偏好</span>
+                <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.priority}</span>
                 <div className="flex gap-2">
-                  {PRIORITIES.map((p) => (
+                  {PRIORITIES.map((p, i) => (
                     <button
                       key={p}
                       type="button"
@@ -278,7 +288,7 @@ export function QuoteGenerator() {
                           : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-slate-200'
                       }`}
                     >
-                      {p}
+                      {t.quote.priorities[i] ?? p}
                     </button>
                   ))}
                 </div>
@@ -286,19 +296,19 @@ export function QuoteGenerator() {
 
               {/* 姓名 */}
               <label>
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">姓名</span>
-                <input className={INPUT_CLS} placeholder="请输入姓名" value={name} onChange={(e) => setName(e.target.value)} />
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.name}</span>
+                <input className={INPUT_CLS} placeholder={t.quote.fields.namePlaceholder} value={name} onChange={(e) => setName(e.target.value)} />
               </label>
 
               {/* 电话/微信 */}
               <label>
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">电话 / 微信</span>
-                <input className={INPUT_CLS} placeholder="便于顾问联系" value={contact} onChange={(e) => setContact(e.target.value)} />
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-slate-400">{t.quote.fields.contact}</span>
+                <input className={INPUT_CLS} placeholder={t.quote.fields.contactPlaceholder} value={contact} onChange={(e) => setContact(e.target.value)} />
               </label>
 
               {/* Submit */}
               <div className="md:col-span-2 pt-1">
-                <Button className="energy-button w-full">生成专属物流方案</Button>
+                <Button className="energy-button w-full">{t.quote.fields.submit}</Button>
               </div>
             </form>
           </div>
@@ -317,7 +327,7 @@ export function QuoteGenerator() {
                   className="mb-4 flex items-center gap-2.5 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3"
                 >
                   <span className="text-emerald-400">✓</span>
-                  <p className="text-sm font-bold text-emerald-300">已收到需求，顾问将在 2 小时内与您联系</p>
+                  <p className="text-sm font-bold text-emerald-300">{t.quote.plan.submitted}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -332,36 +342,43 @@ export function QuoteGenerator() {
                 transition={{ duration: 0.22 }}
               >
                 {/* Header */}
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-300/70">Plan Matched · 方案已匹配</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-300/70">{t.quote.plan.header}</p>
                 <h3 className="mt-1.5 font-display text-2xl font-black text-white">
-                  {country}
-                  <span className="ml-2 text-lg font-bold text-slate-400">· {priority}</span>
+                  {displayCountry}
+                  <span className="ml-2 text-lg font-bold text-slate-400">· {displayPriority}</span>
                 </h3>
 
                 {/* Channels */}
                 <div className="mt-5 space-y-2.5">
-                  {plan.channels.map((ch) => (
-                    <div key={ch.name} className="flex items-center gap-3 rounded-xl border border-white/8 bg-slate-950/50 px-4 py-3">
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <span className="font-bold text-white text-sm">{ch.name}</span>
+                  {plan.channels.map((ch) => {
+                    const chName  = lang === 'zh' ? ch.name  : (t.quote.planData.channelNames[ch.name]  ?? ch.name);
+                    const chBadge = lang === 'zh' ? ch.badge : (t.quote.planData.badgeNames[ch.badge]   ?? ch.badge);
+                    return (
+                      <div key={ch.name} className="flex items-center gap-3 rounded-xl border border-white/8 bg-slate-950/50 px-4 py-3">
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <span className="font-bold text-white text-sm">{chName}</span>
+                        </div>
+                        <span className="shrink-0 text-xs text-slate-400">{ch.time}</span>
+                        <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-black ${BADGE_CLS[ch.color]}`}>
+                          {chBadge}
+                        </span>
                       </div>
-                      <span className="shrink-0 text-xs text-slate-400">{ch.time}</span>
-                      <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-black ${BADGE_CLS[ch.color]}`}>
-                        {ch.badge}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Warehouses */}
                 <div className="mt-4">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-500">仓储节点</p>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-500">{t.quote.plan.warehouseLabel}</p>
                   <div className="flex flex-wrap gap-2">
-                    {plan.warehouses.map((w) => (
-                      <span key={w} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-slate-300">
-                        {w}
-                      </span>
-                    ))}
+                    {plan.warehouses.map((w) => {
+                      const wName = lang === 'zh' ? w : (t.quote.planData.warehouseNames[w] ?? w);
+                      return (
+                        <span key={w} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-slate-300">
+                          {wName}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -372,33 +389,29 @@ export function QuoteGenerator() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="mt-4 rounded-xl border border-amber-400/25 bg-amber-400/[0.07] px-4 py-3 text-xs leading-5 text-amber-200"
                   >
-                    ⚠️ 带电/锂电池货物须走专业认证渠道，部分国家有额外限制，顾问将协助确认合规方案。
+                    {t.quote.plan.electricWarning}
                   </motion.div>
                 )}
 
                 {/* Hint */}
                 <div className="mt-4 rounded-xl border border-cyan-200/12 bg-cyan-200/[0.04] px-4 py-3 text-xs leading-5 text-slate-400">
-                  💡 {plan.hint}
+                  💡 {planHint}
                 </div>
               </motion.div>
             </AnimatePresence>
 
             {/* ── WeChat CTA ── */}
             <div className="mt-6 border-t border-white/[0.07] pt-5">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">直联顾问 · WeChat</p>
+              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">{t.quote.wechat.label}</p>
               <div className="flex items-start gap-4">
                 <QrCode />
                 <div className="flex flex-col justify-center gap-2 pt-1">
-                  <p className="font-black text-white text-sm">扫码添加专属顾问</p>
+                  <p className="font-black text-white text-sm">{t.quote.wechat.title}</p>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                    <span className="text-xs font-bold text-amber-300">📞 美国：+1 (208) 380-8736</span>
+                    <span className="text-xs font-bold text-amber-300">{t.quote.wechat.phone}</span>
                   </div>
-                  {[
-                    '通常 2 小时内响应',
-                    '免费方案咨询',
-                    '无需预约 · 即时沟通',
-                  ].map((item) => (
+                  {t.quote.wechat.items.map((item) => (
                     <div key={item} className="flex items-center gap-1.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                       <span className="text-xs text-slate-400">{item}</span>

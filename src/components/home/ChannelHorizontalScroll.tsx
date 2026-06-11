@@ -5,9 +5,23 @@ import { motion } from 'framer-motion';
 import { channels } from '@/data/channels';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { Button } from '@/components/ui/Button';
+import { useLang } from '@/context/LangContext';
 
-/* ─── Filter tabs ────────────────────────────────────────────────────────────── */
+/* ─── Filter tabs (static; display text comes from t.channels.filterTabs) ── */
 const FILTERS = ['时效优先', '成本优先', 'FBA 入仓', '大货出运'] as const;
+
+/* ─── Display channel type (allows string overrides) ───────────────────── */
+interface DisplayChannel {
+  name:     string;
+  passCode: string;
+  badge:    string;
+  eta:      string;
+  etaNote:  string;
+  carrier:  string;
+  scene:    string;
+  tags:     readonly string[];
+  isCyan:   boolean;
+}
 
 /* ─── Barcode decoration heights (deterministic, no random) ─────────────────── */
 const BAR_HEIGHTS = [5, 9, 4, 11, 3, 8, 6, 10, 4, 7, 5, 9];
@@ -18,7 +32,7 @@ function RoutePassCard({
   index,
   setRef,
 }: {
-  channel: (typeof channels)[number];
+  channel: DisplayChannel;
   index: number;
   setRef: (el: HTMLElement | null) => void;
 }) {
@@ -191,11 +205,26 @@ function RoutePassCard({
 
 /* ─── ChannelHorizontalScroll ──────────────────────────────────────────────── */
 export function ChannelHorizontalScroll() {
+  const { lang, t } = useLang();
   const sectionRef     = useRef<HTMLElement>(null);
   const trackRef       = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const cardRefs       = useRef<(HTMLElement | null)[]>([]);
   const [activeFilter, setActiveFilter] = useState(0);
+
+  /* Build display channels — overlay non-ZH text from t.channels.cards */
+  const displayChannels: DisplayChannel[] = channels.map((ch, i) => {
+    if (lang === 'zh') return ch as unknown as DisplayChannel;
+    const ov = t.channels.cards[i];
+    return {
+      ...ch,
+      name:    ov?.name    ?? ch.name,
+      etaNote: ov?.etaNote ?? ch.etaNote,
+      carrier: ov?.carrier ?? ch.carrier,
+      scene:   ov?.scene   ?? ch.scene,
+      tags:    ov?.tags    ?? ch.tags,
+    };
+  });
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -268,13 +297,13 @@ export function ChannelHorizontalScroll() {
         >
           <p className="mb-3 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.36em] text-cyan-300">
             <span className="inline-block size-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,.9)]" />
-            US ROUTE PASS
+            {t.channels.eyebrow}
           </p>
           <h2 className="font-display text-[clamp(1.9rem,3.8vw,3.6rem)] font-black leading-tight tracking-[-0.04em] text-white">
-            美线渠道通行证
+            {t.channels.title}
           </h2>
           <p className="mt-4 max-w-2xl text-[14.5px] leading-8 text-slate-400">
-            围绕不同货量、时效和入仓需求，歌运物流提供多档美线海运、卡派与 FBA 入仓渠道，让补货节奏更稳。
+            {t.channels.description}
           </p>
         </motion.div>
 
@@ -286,7 +315,9 @@ export function ChannelHorizontalScroll() {
           transition={{ delay: 0.14, duration: 0.55 }}
           className="mt-6 flex flex-wrap gap-2"
         >
-          {FILTERS.map((label, i) => (
+          {FILTERS.map((_, i) => {
+            const label = t.channels.filterTabs[i] ?? FILTERS[i];
+            return (
             <button
               key={label}
               onClick={() => setActiveFilter(i)}
@@ -300,7 +331,8 @@ export function ChannelHorizontalScroll() {
             >
               {label}
             </button>
-          ))}
+            );
+          })}
         </motion.div>
       </div>
 
@@ -323,9 +355,9 @@ export function ChannelHorizontalScroll() {
           ref={trackRef}
           className="flex flex-col gap-5 px-4 lg:w-max lg:flex-row lg:gap-8 lg:px-[calc((100vw-min(1180px,calc(100%-32px)))/2)]"
         >
-          {channels.map((channel, index) => (
+          {displayChannels.map((channel, index) => (
             <RoutePassCard
-              key={channel.name}
+              key={index}
               channel={channel}
               index={index}
               setRef={(el) => { cardRefs.current[index] = el; }}
@@ -361,10 +393,10 @@ export function ChannelHorizontalScroll() {
           {/* Top glow line */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
           <p className="relative max-w-xl text-[13.5px] leading-7 text-slate-400">
-            不同货量、目的仓、时效要求，对应不同美线渠道。提交需求后，歌运顾问将为你匹配合适方案。
+            {t.channels.ctaDesc}
           </p>
           <Button href="#quote" className="relative shrink-0 shadow-[0_0_36px_rgba(34,211,238,.28)]">
-            获取美线方案
+            {t.channels.cta}
           </Button>
         </motion.div>
       </div>

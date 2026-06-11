@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Lazy-load WebGL globe ─────────────────────────────────────────────── */
 const GlobeScene = dynamic(
@@ -78,12 +79,16 @@ function RouteCard({
   isActive,
   onEnter,
   onLeave,
+  titleText,
+  descText,
 }: {
   route: (typeof ROUTES)[number];
   index: number;
   isActive: boolean;
   onEnter: () => void;
   onLeave: () => void;
+  titleText: string;
+  descText: string;
 }) {
   const accentColor = route.isCyan ? '#22d3ee' : '#f4b35b';
   const accentRgba  = route.isCyan ? '34,211,238' : '244,179,91';
@@ -123,7 +128,7 @@ function RouteCard({
             {route.code}
           </span>
           <div>
-            <p className="text-[13px] font-bold leading-snug text-white">{route.title}</p>
+            <p className="text-[13px] font-bold leading-snug text-white">{titleText}</p>
             <p
               className="mt-0.5 font-mono text-[9px] tracking-[0.18em]"
               style={{ color: `rgba(${accentRgba},0.50)` }}
@@ -144,7 +149,7 @@ function RouteCard({
         </span>
       </div>
 
-      <p className="mt-2 pl-8 text-[11.5px] leading-[1.75] text-slate-400">{route.desc}</p>
+      <p className="mt-2 pl-8 text-[11.5px] leading-[1.75] text-slate-400">{descText}</p>
     </motion.div>
   );
 }
@@ -258,6 +263,7 @@ function GlobalNetworkPanel() {
 
 /* ─── GlobalRouteMap ────────────────────────────────────────────────────── */
 export function GlobalRouteMap() {
+  const { t } = useLang();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, margin: '-80px' });
@@ -287,13 +293,13 @@ export function GlobalRouteMap() {
         >
           <p className="mb-3 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.36em] text-cyan-300">
             <span className="inline-block size-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,.9)]" />
-            GLOBAL ROUTE COMMAND CENTER
+            {t.globalRoute.eyebrow}
           </p>
           <h2 className="font-display text-[clamp(1.9rem,3.8vw,3.6rem)] font-black leading-tight tracking-[-0.04em] text-white">
-            全球航线指挥中心
+            {t.globalRoute.title}
           </h2>
           <p className="mt-4 max-w-2xl text-[14.5px] leading-8 text-slate-400">
-            从义乌出发，连接美线核心节点。围绕美线海运、FBA 入仓、海外仓与尾程派送，歌运物流将跨境运输节点可视化，让每一次发货路径更清晰。
+            {t.globalRoute.description}
           </p>
         </motion.div>
 
@@ -314,6 +320,8 @@ export function GlobalRouteMap() {
                 isActive={activeIndex === i}
                 onEnter={() => setActiveIndex(i)}
                 onLeave={() => setActiveIndex(null)}
+                titleText={t.globalRoute.routes[i]?.title ?? route.title}
+                descText={t.globalRoute.routes[i]?.desc ?? route.desc}
               />
             ))}
 
@@ -324,7 +332,7 @@ export function GlobalRouteMap() {
               className="mt-1 flex items-center gap-2 pl-1 text-[11px] tracking-[0.06em] text-slate-500"
             >
               <span className="size-1.5 shrink-0 rounded-full bg-amber-400/70 shadow-[0_0_6px_rgba(244,179,91,.6)]" />
-              起点 · 义乌，中国 &nbsp;—&nbsp; 全球航线运营中枢
+              {t.globalRoute.origin}
             </motion.p>
           </motion.div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 const STEPS = [
@@ -36,13 +37,22 @@ const nodeGlowId = (i: number) =>
 
 /* ─── Component ─────────────────────────────────────────────────────── */
 export function LogisticsFlow() {
+  const { t } = useLang();
+
+  /* Overlay translated label + desc onto static position/id/en data */
+  const displaySteps = STEPS.map((s, i) => ({
+    ...s,
+    label: t.flow.steps[i]?.label ?? s.label,
+    desc:  t.flow.steps[i]?.desc  ?? s.desc,
+  }));
+
   return (
     <section className="container-x py-28">
       <SectionHeading
         align="center"
-        eyebrow="END-TO-END FLOW"
-        title="全链路跨境履约动线"
-        description="从义乌集货到海外签收，覆盖仓储、分拣、出运、清关、海外仓与尾程派送，关键节点全程可视化追踪。"
+        eyebrow={t.flow.eyebrow}
+        title={t.flow.title}
+        description={t.flow.description}
       />
 
       <div className="relative overflow-hidden rounded-[2.8rem] border border-cyan-200/10 bg-slate-950/80 shadow-[0_0_90px_rgba(34,211,238,.10)]">
@@ -100,9 +110,9 @@ export function LogisticsFlow() {
               <rect x="760" y="0" width="360" height="510" fill="#060d1c" />
 
               {/* Zone labels */}
-              <text x="40"   y="44" fill="#f4b35b" fillOpacity="0.32" fontSize="9" fontWeight="900" letterSpacing="4">CHINA · 中国</text>
-              <text x="560"  y="44" fill="#22d3ee" fillOpacity="0.22" fontSize="9" fontWeight="900" letterSpacing="4" textAnchor="middle">OCEAN TRANSIT · 远洋</text>
-              <text x="1080" y="44" fill="#818cf8" fillOpacity="0.32" fontSize="9" fontWeight="900" letterSpacing="4" textAnchor="end">OVERSEAS · 海外</text>
+              <text x="40"   y="44" fill="#f4b35b" fillOpacity="0.32" fontSize="9" fontWeight="900" letterSpacing="4">{t.flow.zoneChina}</text>
+              <text x="560"  y="44" fill="#22d3ee" fillOpacity="0.22" fontSize="9" fontWeight="900" letterSpacing="4" textAnchor="middle">{t.flow.zoneOcean}</text>
+              <text x="1080" y="44" fill="#818cf8" fillOpacity="0.32" fontSize="9" fontWeight="900" letterSpacing="4" textAnchor="end">{t.flow.zoneOverseas}</text>
 
               {/* Zone dividers */}
               <line x1="360" y1="58" x2="360" y2="495" stroke="#22d3ee" strokeOpacity="0.07" strokeDasharray="3,9" />
@@ -179,7 +189,7 @@ export function LogisticsFlow() {
               </circle>
 
               {/* ── Nodes ── */}
-              {STEPS.map((s, i) => {
+              {displaySteps.map((s, i) => {
                 const col   = nodeColor(i);
                 const glow  = nodeGlowId(i);
                 const above = s.above;
@@ -236,7 +246,7 @@ export function LogisticsFlow() {
 
             {/* ── Description strip ── */}
             <div className="grid grid-cols-7 divide-x divide-white/[0.05] border-t border-white/[0.06]">
-              {STEPS.map((s, i) => {
+              {displaySteps.map((s, i) => {
                 const colorClass =
                   i === 0 ? 'text-amber-300' :
                   i === 6 ? 'text-indigo-300' :

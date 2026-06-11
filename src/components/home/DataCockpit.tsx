@@ -2,6 +2,7 @@
 
 import { motion, useInView, useAnimationFrame } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Card data ─────────────────────────────────────────────────────────── */
 const CARDS = [
@@ -238,7 +239,17 @@ const BOTTOM_MAP = {
 };
 
 /* ─── KPI Card ───────────────────────────────────────────────────────────── */
-function KpiCard({ card, index }: { card: (typeof CARDS)[number]; index: number }) {
+function KpiCard({
+  card,
+  index,
+  labelText,
+  descText,
+}: {
+  card: (typeof CARDS)[number];
+  index: number;
+  labelText: string;
+  descText: string;
+}) {
   const [hovered, setHovered] = useState(false);
   const Icon    = ICONS[index];
   const accent  = card.isCyan ? '#22d3ee' : '#f4b35b';
@@ -281,7 +292,7 @@ function KpiCard({ card, index }: { card: (typeof CARDS)[number]; index: number 
           className="rounded-md px-1.5 py-0.5 font-mono text-[8px] font-black tracking-[0.18em]"
           style={{ color: `rgba(${accentR},0.7)`, border: `1px solid rgba(${accentR},0.18)`, background: `rgba(${accentR},0.06)` }}
         >
-          {card.label}
+          {labelText}
         </span>
       </div>
 
@@ -299,7 +310,7 @@ function KpiCard({ card, index }: { card: (typeof CARDS)[number]; index: number 
       </div>
 
       {/* Description */}
-      <p className="mt-2 text-[12.5px] leading-[1.7] text-slate-400">{card.desc}</p>
+      <p className="mt-2 text-[12.5px] leading-[1.7] text-slate-400">{descText}</p>
 
       {/* Bottom decorator */}
       <Bottom isCyan={card.isCyan} />
@@ -317,7 +328,7 @@ function KpiCard({ card, index }: { card: (typeof CARDS)[number]; index: number 
 }
 
 /* ─── Chain strip ────────────────────────────────────────────────────────── */
-function ChainStrip() {
+function ChainStrip({ chain }: { chain: readonly string[] }) {
   return (
     <div className="mt-10 overflow-hidden rounded-2xl border border-white/8 bg-slate-950/50 p-5 backdrop-blur-md">
       <p className="mb-4 text-center font-mono text-[8.5px] font-black tracking-[0.3em] text-cyan-400/70">
@@ -334,7 +345,7 @@ function ChainStrip() {
           />
         </div>
 
-        {CHAIN.map((node, i) => {
+        {chain.map((node, i) => {
           const isCyan = i % 2 === 0;
           const c      = isCyan ? '#22d3ee' : '#f4b35b';
           const cr     = isCyan ? '34,211,238' : '244,179,91';
@@ -366,6 +377,7 @@ function ChainStrip() {
 
 /* ─── DataCockpit ────────────────────────────────────────────────────────── */
 export function DataCockpit() {
+  const { t } = useLang();
   const sectionRef = useRef<HTMLElement>(null);
   const inView     = useInView(sectionRef, { once: true, margin: '-80px' });
 
@@ -416,13 +428,13 @@ export function DataCockpit() {
             >
               <p className="mb-3 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.36em] text-cyan-300">
                 <span className="inline-block size-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,.9)]" />
-                DATA COCKPIT
+                {t.cockpit.eyebrow}
               </p>
               <h2 className="font-display text-[clamp(1.8rem,3.5vw,3.2rem)] font-black leading-tight tracking-[-0.04em] text-white">
-                跨境物流数据驾驶舱
+                {t.cockpit.title}
               </h2>
               <p className="mt-3 max-w-xl text-[14px] leading-7 text-slate-400">
-                以数据化能力组织义乌货源、全国分公司、美线渠道、海外仓和尾程派送，让每一次交付有路径、有节点、有回传。
+                {t.cockpit.description}
               </p>
             </motion.div>
 
@@ -454,12 +466,18 @@ export function DataCockpit() {
           {/* ── KPI Grid ── */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CARDS.map((card, i) => (
-              <KpiCard key={card.label} card={card} index={i} />
+              <KpiCard
+                key={card.label}
+                card={card}
+                index={i}
+                labelText={t.cockpit.cards[i]?.label ?? card.label}
+                descText={t.cockpit.cards[i]?.desc ?? card.desc}
+              />
             ))}
           </div>
 
           {/* ── Chain strip ── */}
-          <ChainStrip />
+          <ChainStrip chain={t.cockpit.chain} />
         </div>
       </div>
     </section>

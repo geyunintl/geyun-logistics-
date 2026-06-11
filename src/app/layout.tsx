@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Sora } from 'next/font/google';
 import './globals.css';
 import { LenisProvider } from '@/components/layout/LenisProvider';
+import { LangProvider } from '@/context/LangContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
@@ -17,11 +18,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="zh-CN" className={`${inter.variable} ${sora.variable}`}>
       <body>
-        <LenisProvider>
-          <Navbar />
-          {children}
-          <Footer />
-        </LenisProvider>
+        <LangProvider>
+          <LenisProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </LenisProvider>
+        </LangProvider>
       </body>
     </html>
   );

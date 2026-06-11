@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { homeData } from '@/data/home';
 import { Button } from '@/components/ui/Button';
 import { HeroVisualSystem } from '@/components/home/HeroVisualSystem';
 import { HeroLoadOverlay } from '@/components/home/HeroLoadOverlay';
@@ -12,8 +11,47 @@ import {
   HeroPlaneTrail,
   HeroParticles,
 } from '@/components/home/HeroCinematic';
+import { useLang } from '@/context/LangContext';
+
+/* ── Helper: build animatable segments for ZH (chars) vs non-ZH (words) ─ */
+
+type Segment = { text: string; highlight: boolean; br: boolean };
+
+function buildSegments(title: string, lang: string, highlightWords: string[]): Segment[] {
+  if (lang === 'zh') {
+    const ZH_HIGHLIGHTS = new Set(['义', '乌', '全', '球']);
+    return Array.from(title).map((ch) => ({
+      text:      ch,
+      highlight: ZH_HIGHLIGHTS.has(ch),
+      br:        ch === '，',
+    }));
+  }
+  // Non-ZH: split lines on \n, then split each line into words
+  const lines = title.split('\n');
+  const segments: Segment[] = [];
+  lines.forEach((line, li) => {
+    const words = line.trim().split(/\s+/);
+    words.forEach((word, wi) => {
+      // clean punctuation for matching
+      const clean = word.replace(/[,，.。!！?？]/g, '');
+      segments.push({
+        text:      word + (wi < words.length - 1 ? ' ' : ''),
+        highlight: highlightWords.includes(clean),
+        br:        false,
+      });
+    });
+    // add line break after every line except the last
+    if (li < lines.length - 1) {
+      segments.push({ text: '', highlight: false, br: true });
+    }
+  });
+  return segments;
+}
+
+/* ─────────────────────────────────────────────────────────────────────── */
 
 export function HeroSection() {
+  const { lang, t } = useLang();
   const [showLoader, setShowLoader] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -23,7 +61,11 @@ export function HeroSection() {
   const bgY = useTransform(smoothY, [-1, 1], [-10, 10]);
   const contentX = useTransform(smoothX, [-1, 1], [6, -6]);
   const contentY = useTransform(smoothY, [-1, 1], [4, -4]);
-  const titleChars = useMemo(() => Array.from(homeData.hero.title), []);
+
+  const segments = useMemo(
+    () => buildSegments(t.hero.title, lang, t.hero.highlightWords),
+    [t.hero.title, lang, t.hero.highlightWords],
+  );
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -44,6 +86,12 @@ export function HeroSection() {
     mouseY.set(0);
   }, [mouseX, mouseY]);
 
+  // Stagger delay: ZH uses index * 0.026 (char), non-ZH uses index * 0.07 (word)
+  const delayMult = lang === 'zh' ? 0.026 : 0.07;
+
+  // Track non-br index for stagger delay
+  let animIdx = 0;
+
   return (
     <section
       onMouseMove={handleMouseMove}
@@ -54,7 +102,7 @@ export function HeroSection() {
         {showLoader ? <HeroLoadOverlay onComplete={() => setShowLoader(false)} /> : null}
       </AnimatePresence>
 
-      {/* Background — clean image, no baked-in text */}
+      {/* Background */}
       <motion.div className="pointer-events-none absolute inset-[-2%] z-0" style={{ x: bgX, y: bgY }}>
         <HeroVisualSystem />
       </motion.div>
@@ -64,14 +112,14 @@ export function HeroSection() {
       <HeroGlobeOverlay />
       <HeroParticles />
 
-      {/* Content — left-pinned */}
+      {/* Content */}
       <motion.div
         className="relative z-10 w-full max-w-screen-xl pb-32 pl-4 pt-4 sm:pl-6 lg:pb-36 lg:pl-10 xl:pl-14"
         style={{ x: contentX, y: contentY }}
       >
         <div className="max-w-[560px]">
 
-          {/* Logo */}
+          {/* Logo badge */}
           <motion.div
             initial={{ opacity: 0, y: -14 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,25 +137,31 @@ export function HeroSection() {
 
           {/* Title */}
           <h1
-            aria-label={homeData.hero.title}
+            aria-label={t.hero.title}
             className="font-display text-[clamp(2.2rem,4.8vw,5.2rem)] font-black leading-[1.04] tracking-[-0.06em] text-white text-glow-cyan"
           >
-            {titleChars.map((char, index) => (
-              <motion.span
-                key={`${char}-${index}`}
-                aria-hidden="true"
-                initial={{ opacity: 0, y: 36, filter: 'blur(14px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ delay: 0.22 + index * 0.026, duration: 0.55, ease: 'easeOut' }}
-                className={
-                  char === '义' || char === '乌' || char === '全' || char === '球'
-                    ? 'inline-block bg-gradient-to-r from-cyan-200 via-white to-amber-200 bg-clip-text text-transparent'
-                    : 'inline-block'
-                }
-              >
-                {char === '，' ? <><span>，</span><br /></> : char}
-              </motion.span>
-            ))}
+            {segments.map((seg, i) => {
+              if (seg.br) {
+                return <br key={`br-${i}`} />;
+              }
+              const idx = animIdx++;
+              return (
+                <motion.span
+                  key={`${seg.text}-${i}`}
+                  aria-hidden="true"
+                  initial={{ opacity: 0, y: 36, filter: 'blur(14px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: 0.22 + idx * delayMult, duration: 0.55, ease: 'easeOut' }}
+                  className={
+                    seg.highlight
+                      ? 'inline-block bg-gradient-to-r from-cyan-200 via-white to-amber-200 bg-clip-text text-transparent'
+                      : 'inline-block'
+                  }
+                >
+                  {seg.text}
+                </motion.span>
+              );
+            })}
           </h1>
 
           {/* Subtitle */}
@@ -117,7 +171,7 @@ export function HeroSection() {
             transition={{ delay: 1.1, duration: 0.7, ease: 'easeOut' }}
             className="mt-6 max-w-md text-sm leading-7 text-slate-300 md:text-[15px] md:leading-8"
           >
-            {homeData.hero.subtitle}
+            {t.hero.subtitle}
           </motion.p>
 
           {/* Service tags */}
@@ -127,7 +181,7 @@ export function HeroSection() {
             transition={{ delay: 1.22, duration: 0.6 }}
             className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11.5px] font-semibold tracking-[0.04em] text-slate-300"
           >
-            {['美线专线', 'FBA 入仓', '海外仓', '海运空运', '一件代发', '尾程派送'].map((tag) => (
+            {t.hero.tags.map((tag) => (
               <span key={tag} className="flex items-center gap-1.5">
                 <span className="size-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_7px_rgba(34,211,238,.9)]" />
                 {tag}
@@ -143,16 +197,15 @@ export function HeroSection() {
             className="mt-7 flex flex-wrap gap-4"
           >
             <Button href="#quote" className="energy-button shadow-[0_0_48px_rgba(34,211,238,.40)]">
-              {homeData.hero.primaryCta}
+              {t.hero.primaryCta}
             </Button>
             <Button href="#channels" variant="ghost" className="energy-button">
-              {homeData.hero.secondaryCta}
+              {t.hero.secondaryCta}
             </Button>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Stats bar — animated, correct values, no 0 bug */}
       <HeroStatsBar />
     </section>
   );

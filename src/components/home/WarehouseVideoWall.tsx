@@ -4,8 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { warehouseVideos } from '@/data/warehouse';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-
-const tags = ['入仓', '分拣', '打包', '贴标', '装柜', '出运', '海外仓'];
+import { useLang } from '@/context/LangContext';
 
 // Ambient video that autoplays silently, falls back to poster image
 function AmbientVideo({
@@ -44,13 +43,15 @@ function AmbientVideo({
 }
 
 export function WarehouseVideoWall() {
+  const { t } = useLang();
+  const tags = t.warehouse.tags;
   const [main, ...rest] = warehouseVideos;
   return (
     <section className="container-x py-28">
       <SectionHeading
-        eyebrow="WAREHOUSE CINEMATIC"
-        title="仓储电影墙"
-        description="以真实仓储场景呈现歌运作业体系，从货品入仓、分拣打包、贴标复核到整柜出运，关键节点清晰可见，让跨境物流交付更透明、更可控。"
+        eyebrow={t.warehouse.eyebrow}
+        title={t.warehouse.title}
+        description={t.warehouse.description}
       />
       <div className="relative overflow-hidden rounded-[3rem] border border-cyan-200/10 bg-slate-950/72 p-5 shadow-[0_0_90px_rgba(34,211,238,.10)] md:p-7">
         <div className="absolute inset-0 hero-grid opacity-20" />

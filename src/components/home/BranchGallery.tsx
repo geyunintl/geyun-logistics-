@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { useLang } from '@/context/LangContext';
 
 // ─── Branch data — network diagram positions ────────────────────────────────────
 // viewBox 0 0 880 780  |  HQ at center (440, 380)
@@ -107,6 +108,7 @@ const HQ_RING2 = '440,303 506,339 506,421 440,457 374,421 374,339';  // R=77
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function BranchGallery() {
+  const { lang, t } = useLang();
   const [activeCity, setActiveCity] = useState('义乌总部');
   const [hoverCity,  setHoverCity]  = useState<string | null>(null);
   const [inView,     setInView]     = useState(false);
@@ -115,6 +117,11 @@ export function BranchGallery() {
   const highlightedCity = hoverCity ?? activeCity;
   const activeBranch = useMemo(
     () => BRANCHES.find((b) => b.city === activeCity) ?? BRANCHES[0],
+    [activeCity],
+  );
+  /* index of active branch for translation lookup */
+  const activeBranchIdx = useMemo(
+    () => BRANCHES.findIndex((b) => b.city === activeCity),
     [activeCity],
   );
 
@@ -141,9 +148,9 @@ export function BranchGallery() {
       {/* ── Section heading ── */}
       <SectionHeading
         align="center"
-        eyebrow="CHINA SERVICE NETWORK"
-        title="中国服务网络指挥图"
-        description="以义乌总部为调度核心，联动深圳、泉州、武汉、太原、长沙分公司，深入产业带与跨境卖家一线，形成从货源集散、仓储分拨到美线出运的全国协同服务网络。"
+        eyebrow={t.branch.eyebrow}
+        title={t.branch.title}
+        description={t.branch.description}
       />
 
       {/* ── Main grid ── */}
@@ -628,14 +635,18 @@ export function BranchGallery() {
                   {activeBranch.en}
                 </p>
                 <h3 className="mt-1 font-display text-[1.75rem] font-black text-white leading-tight">
-                  {activeBranch.city}
+                  {lang !== 'zh' ? (t.branch.cities[activeBranchIdx]?.city ?? activeBranch.city) : activeBranch.city}
                 </h3>
               </div>
             </div>
 
             {/* Content */}
             <div className="flex flex-1 flex-col gap-4 p-5">
-              <p className="text-sm leading-7 text-slate-300">{activeBranch.desc}</p>
+              <p className="text-sm leading-7 text-slate-300">
+                {lang !== 'zh'
+                  ? (t.branch.cities[activeBranchIdx]?.description ?? activeBranch.desc)
+                  : activeBranch.desc}
+              </p>
               <div className="flex flex-wrap gap-2">
                 {activeBranch.tags.map((tag) => (
                   <span
@@ -657,7 +668,7 @@ export function BranchGallery() {
                   Network Nodes
                 </p>
                 <div className="grid grid-cols-3 gap-2">
-                  {BRANCHES.map((b) => (
+                  {BRANCHES.map((b, bi) => (
                     <button
                       key={b.city}
                       type="button"
@@ -670,7 +681,7 @@ export function BranchGallery() {
                           : 'border-white/[0.07] bg-white/[0.03] text-slate-400 hover:border-cyan-400/25 hover:text-slate-200'
                       }`}
                     >
-                      {b.cityShort}
+                      {lang !== 'zh' ? (t.branch.cities[bi]?.city ?? b.cityShort) : b.cityShort}
                       {b.isHQ ? <span className="ml-0.5 text-amber-300">★</span> : null}
                     </button>
                   ))}
@@ -764,15 +775,18 @@ export function BranchGallery() {
       {/* ═══ Stats bar ═══ */}
       <div className="glow-line mt-4 overflow-hidden rounded-2xl border border-cyan-400/[0.1] bg-slate-950/70 backdrop-blur-xl">
         <div className="flex flex-wrap">
-          {STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="flex-1 min-w-[100px] border-r border-white/[0.05] last:border-r-0 px-4 py-4 text-center"
-            >
-              <p className="text-[9px] font-black tracking-[0.22em] uppercase text-cyan-400/60">{stat.label}</p>
-              <p className="mt-1 text-base font-black text-white leading-tight">{stat.value}</p>
-            </div>
-          ))}
+          {STATS.map((stat, i) => {
+            const s = t.branch.stats[i] ?? stat;
+            return (
+              <div
+                key={stat.label}
+                className="flex-1 min-w-[100px] border-r border-white/[0.05] last:border-r-0 px-4 py-4 text-center"
+              >
+                <p className="text-[9px] font-black tracking-[0.22em] uppercase text-cyan-400/60">{s.label}</p>
+                <p className="mt-1 text-base font-black text-white leading-tight">{s.value}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 

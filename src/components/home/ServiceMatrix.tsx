@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Service data ──────────────────────────────────────────────────────────── */
 const SERVICES = [
@@ -112,12 +113,16 @@ const SERVICE_ICONS = [IconOcean, IconAir, IconFBA, IconWarehouse, IconContainer
 /* ─── Service node card ─────────────────────────────────────────────────────── */
 function ServiceNode({
   service, index, isActive, onClick, delay = 0,
+  titleText, descText, tagsText,
 }: {
   service: (typeof SERVICES)[number];
   index: number;
   isActive: boolean;
   onClick: () => void;
   delay?: number;
+  titleText: string;
+  descText: string;
+  tagsText: string[];
 }) {
   const accent  = service.isCyan ? '#22d3ee' : '#f4b35b';
   const accentR = service.isCyan ? '34,211,238' : '244,179,91';
@@ -173,7 +178,7 @@ function ServiceNode({
           <Icon color={accent} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13.5px] font-bold leading-snug text-white">{service.title}</p>
+          <p className="truncate text-[13.5px] font-bold leading-snug text-white">{titleText}</p>
           <p
             className="mt-0.5 truncate font-mono text-[8px] tracking-[0.16em]"
             style={{ color: `rgba(${accentR},0.52)` }}
@@ -214,9 +219,9 @@ function ServiceNode({
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            <p className="mt-3 text-[12px] leading-[1.8] text-slate-300">{service.desc}</p>
+            <p className="mt-3 text-[12px] leading-[1.8] text-slate-300">{descText}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {service.tags.map((tag) => (
+              {tagsText.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-md px-2 py-0.5 text-[8.5px] font-semibold"
@@ -368,8 +373,8 @@ function OrbitCore({ activeIndex }: { activeIndex: number }) {
 }
 
 /* ─── Service chain strip (enhanced progress track) ─────────────────────────── */
-function ServiceChain() {
-  const PROGRESS = 2; // index of "in-progress" node (国内入仓)
+function ServiceChain({ chain }: { chain: readonly string[] }) {
+  const PROGRESS = 2; // index of "in-progress" node
 
   return (
     <div className="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-950/50 backdrop-blur-md">
@@ -422,7 +427,7 @@ function ServiceChain() {
             transition={{ duration: 3.8, repeat: Infinity, ease: 'linear' }}
           />
 
-          {CHAIN.map((node, i) => {
+          {chain.map((node, i) => {
             const isCyan  = i % 2 === 0;
             const c       = isCyan ? '#22d3ee' : '#f4b35b';
             const cr      = isCyan ? '34,211,238' : '244,179,91';
@@ -467,6 +472,7 @@ function ServiceChain() {
 
 /* ─── ServiceMatrix (export) ────────────────────────────────────────────────── */
 export function ServiceMatrix() {
+  const { t } = useLang();
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const inView     = useInView(sectionRef, { once: true, margin: '-80px' });
@@ -498,13 +504,13 @@ export function ServiceMatrix() {
         >
           <p className="mb-3 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.36em] text-cyan-300">
             <span className="inline-block size-1.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,.9)]" />
-            SERVICE ORBIT SYSTEM
+            {t.serviceMatrix.eyebrow}
           </p>
           <h2 className="font-display text-[clamp(1.9rem,3.8vw,3.6rem)] font-black leading-tight tracking-[-0.04em] text-white">
-            歌运跨境服务雷达舱
+            {t.serviceMatrix.title}
           </h2>
           <p className="mt-4 max-w-2xl text-[14.5px] leading-8 text-slate-400">
-            围绕美线海运、空运、FBA、海外仓、订舱与尾程派送，构建一站式跨境物流服务矩阵。
+            {t.serviceMatrix.description}
           </p>
         </motion.div>
 
@@ -540,48 +546,34 @@ export function ServiceMatrix() {
           />
 
           {/* ── HUD corner brackets ── */}
-          {/* Top-left */}
           <div className="pointer-events-none absolute left-5 top-5">
             <div className="absolute left-0 top-0 h-7 w-[2px] bg-gradient-to-b from-cyan-400/55 to-transparent" />
             <div className="absolute left-0 top-0 h-[2px] w-7 bg-gradient-to-r from-cyan-400/55 to-transparent" />
           </div>
-          {/* Top-right */}
           <div className="pointer-events-none absolute right-5 top-5">
             <div className="absolute right-0 top-0 h-7 w-[2px] bg-gradient-to-b from-cyan-400/55 to-transparent" />
             <div className="absolute right-0 top-0 h-[2px] w-7 bg-gradient-to-l from-cyan-400/55 to-transparent" />
           </div>
-          {/* Bottom-left */}
           <div className="pointer-events-none absolute bottom-5 left-5">
             <div className="absolute bottom-0 left-0 h-7 w-[2px] bg-gradient-to-t from-amber-400/45 to-transparent" />
             <div className="absolute bottom-0 left-0 h-[2px] w-7 bg-gradient-to-r from-amber-400/45 to-transparent" />
           </div>
-          {/* Bottom-right */}
           <div className="pointer-events-none absolute bottom-5 right-5">
             <div className="absolute bottom-0 right-0 h-7 w-[2px] bg-gradient-to-t from-amber-400/45 to-transparent" />
             <div className="absolute bottom-0 right-0 h-[2px] w-7 bg-gradient-to-l from-amber-400/45 to-transparent" />
           </div>
 
-          {/* ── STATUS BADGE: SERVICE MATRIX ONLINE (top-right) ── */}
+          {/* STATUS BADGES */}
           <div className="pointer-events-none absolute right-14 top-[22px] hidden items-center gap-2 sm:flex">
-            <motion.span
-              className="size-1.5 rounded-full bg-emerald-400"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-            />
-            <span className="font-mono text-[7.5px] font-black tracking-[0.22em] text-emerald-300/65">
-              SERVICE MATRIX ONLINE
-            </span>
+            <motion.span className="size-1.5 rounded-full bg-emerald-400" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.8, repeat: Infinity }} />
+            <span className="font-mono text-[7.5px] font-black tracking-[0.22em] text-emerald-300/65">SERVICE MATRIX ONLINE</span>
           </div>
-
-          {/* ── STATUS BADGE: 6 SERVICE NODES ACTIVE (bottom-left) ── */}
           <div className="pointer-events-none absolute bottom-[22px] left-14 hidden items-center gap-2 sm:flex">
             <span className="size-1.5 rounded-full bg-cyan-400/60 shadow-[0_0_4px_rgba(34,211,238,0.5)]" />
-            <span className="font-mono text-[7.5px] tracking-[0.20em] text-cyan-400/48">
-              6 SERVICE NODES ACTIVE
-            </span>
+            <span className="font-mono text-[7.5px] tracking-[0.20em] text-cyan-400/48">6 SERVICE NODES ACTIVE</span>
           </div>
 
-          {/* ── Star particles ── */}
+          {/* Star particles */}
           {([
             { x:'7%',  y:'12%', s:1.5, o:0.38 },
             { x:'19%', y:'6%',  s:1.0, o:0.28 },
@@ -604,22 +596,17 @@ export function ServiceMatrix() {
             />
           ))}
 
-          {/* ── Desktop: 3-column grid with connector overlay ── */}
+          {/* ── Desktop: 3-column grid ── */}
           <div className="relative hidden md:grid md:grid-cols-[1fr_280px_1fr] md:items-stretch md:gap-6">
 
-            {/* Connector beam + flowing dot overlay */}
+            {/* Connector beam overlay */}
             <div className="pointer-events-none absolute inset-0 z-0">
-              {/* Left beam (active index 0,2,4) */}
               <motion.div
                 animate={{ opacity: isLeftActive ? 1 : 0 }}
                 transition={{ duration: 0.5 }}
                 className="absolute top-1/2 -translate-y-1/2"
-                style={{
-                  right: '50%', left: '10%', height: '1px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.40) 55%, rgba(34,211,238,0.70) 100%)',
-                }}
+                style={{ right: '50%', left: '10%', height: '1px', background: 'linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.40) 55%, rgba(34,211,238,0.70) 100%)' }}
               />
-              {/* Left flowing dot */}
               {isLeftActive && (
                 <motion.div
                   key={`ld-${activeIndex}`}
@@ -629,18 +616,12 @@ export function ServiceMatrix() {
                   transition={{ duration: 2.0, repeat: Infinity, ease: 'linear', repeatDelay: 0.7 }}
                 />
               )}
-
-              {/* Right beam (active index 1,3,5) */}
               <motion.div
                 animate={{ opacity: !isLeftActive ? 1 : 0 }}
                 transition={{ duration: 0.5 }}
                 className="absolute top-1/2 -translate-y-1/2"
-                style={{
-                  left: '50%', right: '10%', height: '1px',
-                  background: 'linear-gradient(90deg, rgba(244,179,91,0.70) 0%, rgba(244,179,91,0.40) 45%, transparent 100%)',
-                }}
+                style={{ left: '50%', right: '10%', height: '1px', background: 'linear-gradient(90deg, rgba(244,179,91,0.70) 0%, rgba(244,179,91,0.40) 45%, transparent 100%)' }}
               />
-              {/* Right flowing dot */}
               {!isLeftActive && (
                 <motion.div
                   key={`rd-${activeIndex}`}
@@ -662,6 +643,9 @@ export function ServiceMatrix() {
                   isActive={activeIndex === idx}
                   onClick={() => setActiveIndex(idx)}
                   delay={col_i * 0.07}
+                  titleText={t.serviceMatrix.services[idx]?.title ?? SERVICES[idx].title}
+                  descText={t.serviceMatrix.services[idx]?.desc ?? SERVICES[idx].desc}
+                  tagsText={t.serviceMatrix.services[idx]?.tags ?? [...SERVICES[idx].tags]}
                 />
               ))}
             </div>
@@ -679,6 +663,9 @@ export function ServiceMatrix() {
                   isActive={activeIndex === idx}
                   onClick={() => setActiveIndex(idx)}
                   delay={col_i * 0.07}
+                  titleText={t.serviceMatrix.services[idx]?.title ?? SERVICES[idx].title}
+                  descText={t.serviceMatrix.services[idx]?.desc ?? SERVICES[idx].desc}
+                  tagsText={t.serviceMatrix.services[idx]?.tags ?? [...SERVICES[idx].tags]}
                 />
               ))}
             </div>
@@ -694,13 +681,16 @@ export function ServiceMatrix() {
                 isActive={activeIndex === i}
                 onClick={() => setActiveIndex(i)}
                 delay={i * 0.05}
+                titleText={t.serviceMatrix.services[i]?.title ?? s.title}
+                descText={t.serviceMatrix.services[i]?.desc ?? s.desc}
+                tagsText={t.serviceMatrix.services[i]?.tags ?? [...s.tags]}
               />
             ))}
           </div>
         </motion.div>
 
         {/* ── Service chain ── */}
-        <ServiceChain />
+        <ServiceChain chain={t.serviceMatrix.chain} />
       </div>
     </section>
   );

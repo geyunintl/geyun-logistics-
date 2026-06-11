@@ -3,6 +3,7 @@
 import { motion, animate } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import styles from './HeroCinematic.module.css';
+import { useLang } from '@/context/LangContext';
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -13,15 +14,15 @@ type StatItem = {
   icon: string;
 };
 
-/* ─── Data ──────────────────────────────────────────────────────────────── */
+/* ─── Static data (values / suffixes / icons — never translated) ─────── */
 
-const heroStats: StatItem[] = [
-  { value: 2017,   suffix: '',    label: '公司成立',     icon: '◉' },
-  { value: 1000,   suffix: '万',  label: '注册资金',     icon: '▣' },
-  { value: 12,     suffix: '+',   label: '分公司布局',   icon: '⌂' },
-  { value: 30000,  suffix: '㎡',  label: '仓储面积',     icon: '▤' },
-  { value: 200,    suffix: '+',   label: '海运专线',     icon: '⇄' },
-  { value: 200000, suffix: 'ft²', label: '洛杉矶海外仓', icon: '⬢' },
+const STAT_BASE = [
+  { value: 2017,   suffix: '',    icon: '◉' },
+  { value: 1000,   suffix: '万',  icon: '▣' },
+  { value: 12,     suffix: '+',   icon: '⌂' },
+  { value: 30000,  suffix: '㎡',  icon: '▤' },
+  { value: 200,    suffix: '+',   icon: '⇄' },
+  { value: 200000, suffix: 'ft²', icon: '⬢' },
 ];
 
 // Fixed particle positions on right half — deterministic, no hydration mismatch
@@ -91,6 +92,12 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }) {
 /* ─── HeroStatsBar ──────────────────────────────────────────────────────── */
 
 export function HeroStatsBar() {
+  const { t } = useLang();
+  const heroStats: StatItem[] = STAT_BASE.map((s, i) => ({
+    ...s,
+    label: t.stats[i]?.label ?? '',
+  }));
+
   return (
     <div className="cinematic-stats absolute bottom-0 left-0 right-0 z-20 overflow-hidden border-t border-white/8 bg-slate-950/55 backdrop-blur-xl">
       <div className={styles.scanLine} aria-hidden="true" />
