@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT 小助手</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      background: #e8f2e8;
+      color: #1c2c1c;
+      min-height: 100vh;
+      padding: 40px 16px 80px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1c2c1c;
+    }
+    .page-header h1 .emoji { font-size: 1.6rem; }
+    .page-header p {
+      margin-top: 8px;
+      color: #4e5e4e;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #f2f8f2;
+      border: 1px solid #c4d8c4;
+      border-radius: 16px;
+      padding: 28px 30px;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #1c2c1c;
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 0.88rem;
+      color: #4e5e4e;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* Session input card */
+    .session-card textarea {
+      width: 100%;
+      min-height: 108px;
+      border: 1px solid #b8d0b8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      color: #1c2c1c;
+      background: #eaf4ea;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .session-card textarea:focus { border-color: #5a9a5a; }
+    .session-card textarea::placeholder { color: #90a890; }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #7a927a;
+    }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s, transform .1s;
+      white-space: nowrap;
+    }
+    button:active { transform: scale(.97); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #5a8a3a;
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: #4a7a2e; }
+
+    .btn-danger {
+      background: transparent;
+      color: #c05030;
+      border: 1.5px solid #c05030;
+    }
+    .btn-danger:hover:not(:disabled) { background: #f5ede8; }
+
+    .btn-copy {
+      background: transparent;
+      color: #4e5e4e;
+      border: 1.5px solid #b0c8b0;
+      font-size: 0.82rem;
+      padding: 6px 14px;
+    }
+    .btn-copy:hover { background: #e2ede2; }
+
+    /* ── Selects ── */
+    .select-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    select {
+      appearance: none;
+      background: #eaf4ea url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a927a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+      border: 1px solid #b8d0b8;
+      border-radius: 8px;
+      padding: 8px 36px 8px 14px;
+      font-size: 0.88rem;
+      color: #1c2c1c;
+      cursor: pointer;
+      outline: none;
+      min-width: 150px;
+      transition: border-color .2s;
+    }
+    select:focus { border-color: #5a9a5a; }
+
+    /* ── Result panel ── */
+    .result-panel {
+      display: none;
+      margin-top: 18px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #b8d0b8;
+    }
+    .result-panel.visible { display: block; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .result-header .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .result-panel.ok   .result-header { background: #daeeda; color: #1a6a2a; }
+    .result-panel.ok   .result-header .status-dot { background: #2a8a3a; }
+    .result-panel.err  .result-header { background: #f8ecec; color: #a83030; }
+    .result-panel.err  .result-header .status-dot { background: #c84040; }
+    .result-panel.info .result-header { background: #ddeedd; color: #3a5a3a; }
+    .result-panel.info .result-header .status-dot { background: #5a8a5a; }
+
+    .result-body {
+      background: #eef7ee;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      color: #1c2c1c;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 360px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    /* Subscription table */
+    .sub-table { width: 100%; border-collapse: collapse; font-family: inherit; font-size: 0.88rem; }
+    .sub-table td { padding: 8px 14px; border-bottom: 1px solid #cce0cc; }
+    .sub-table td:first-child { color: #5a6e5a; width: 36%; }
+    .sub-table td:last-child { font-weight: 500; color: #1c2c1c; }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge.active { background: #d4eed4; color: #1a6a2a; }
+    .badge.inactive { background: #f4e0e0; color: #a83030; }
+    .badge.free { background: #dceadc; color: #5a6e5a; }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin-right: 4px;
+    }
+    .spinner.dark {
+      border-color: rgba(90,138,58,.3);
+      border-top-color: #5a8a3a;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .link-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #eaf4ea;
+      border: 1px solid #b8d0b8;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 14px;
+      word-break: break-all;
+      font-size: 0.82rem;
+    }
+    .link-box a { color: #3a7a3a; flex: 1; }
+
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      .select-row, .btn-row { flex-direction: column; }
+      select { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-header">
+    <h1><span class="emoji">🤖</span> GPT 小助手</h1>
+    <p>粘贴 ChatGPT 的 session JSON（含 accessToken / sessionToken），即可转 Cookie 登录、查订阅、生成各套餐支付链接。</p>
+  </div>
+
+  <!-- Session 输入 -->
+  <div class="card session-card">
+    <div class="card-title">Session JSON / Token</div>
+    <textarea id="sessionInput"
+      placeholder="粘贴 https://chatgpt.com/api/auth/session 的完整 JSON，或直接粘 accessToken / sessionToken"></textarea>
+    <p class="hint">查订阅/生成支付链接用 accessToken；转 Cookie 用 sessionToken。直接粘整段 session JSON 即可，自动识别。</p>
+  </div>
+
+  <!-- ① Session 转 Cookie -->
+  <div class="card">
+    <div class="card-title">① Session 转 Cookie</div>
+    <p class="card-desc">把 sessionToken 转成可导入浏览器的登录态 Cookie（Cookie-Editor 格式）。</p>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="generateCookie()">生成 Cookie</button>
+    </div>
+    <div id="result-cookie" class="result-panel"></div>
+  </div>
+
+  <!-- ② 查询订阅 / 取消续费 -->
+  <div class="card">
+    <div class="card-title">② 查询订阅 / 取消续费</div>
+    <p class="card-desc">查询账号当前订阅（套餐/到期/续费/座位/欠费），并可一键取消自动续费（权益保留到到期日，到期后不再扣款）。</p>
+    <div class="btn-row">
+      <button class="btn-primary" id="btnQuery" onclick="querySubscription()">查询订阅</button>
+      <button class="btn-danger" id="btnCancel" onclick="cancelSubscription()">取消自动续费</button>
+    </div>
+    <div id="result-sub" class="result-panel"></div>
+  </div>
+
+  <!-- ③ 生成支付链接 -->
+  <div class="card">
+    <div class="card-title">③ 生成支付链接</div>
+    <p class="card-desc">用上面的 accessToken 生成指定套餐的官方 hosted checkout 长链接，点开直接付款升级。</p>
+    <div class="select-row">
+      <select id="planSelect" onchange="updateF12Btn()">
+        <option value="chatgptplusplan">Plus（$20/月）</option>
+        <option value="chatgptproplan_consumption">Pro（$100/月）</option>
+        <option value="chatgptproplan">Pro（$200/月）</option>
+        <option value="chatgptteamplan">Team</option>
+      </select>
+      <select id="countrySelect">
+        <option value="US|USD">美国（USD）</option>
+        <option value="PH|PHP" selected>菲律宾（PHP）</option>
+        <option value="TR|TRY">土耳其（TRY）</option>
+        <option value="ID|IDR">印度尼西亚（IDR）</option>
+        <option value="BR|BRL">巴西（BRL）</option>
+        <option value="MX|MXN">墨西哥（MXN）</option>
+        <option value="IN|INR">印度（INR）</option>
+        <option value="AR|ARS">阿根廷（ARS）</option>
+        <option value="TH|THB">泰国（THB）</option>
+        <option value="VN|VND">越南（VND）</option>
+        <option value="MY|MYR">马来西亚（MYR）</option>
+        <option value="NG|NGN">尼日利亚（NGN）</option>
+        <option value="EG|EGP">埃及（EGP）</option>
+        <option value="PK|PKR">巴基斯坦（PKR）</option>
+        <option value="BD|BDT">孟加拉（BDT）</option>
+        <option value="KE|KES">肯尼亚（KES）</option>
+        <option value="KZ|KZT">哈萨克斯坦（KZT）</option>
+        <option value="UA|UAH">乌克兰（UAH）</option>
+        <option value="GB|GBP">英国（GBP）</option>
+        <option value="CA|CAD">加拿大（CAD）</option>
+        <option value="AU|AUD">澳大利亚（AUD）</option>
+        <option value="SG|SGD">新加坡（SGD）</option>
+        <option value="JP|JPY">日本（JPY）</option>
+        <option value="KR|KRW">韩国（KRW）</option>
+        <option value="NZ|NZD">新西兰（NZD）</option>
+        <option value="CH|CHF">瑞士（CHF）</option>
+        <option value="SE|SEK">瑞典（SEK）</option>
+        <option value="NO|NOK">挪威（NOK）</option>
+        <option value="DK|DKK">丹麦（DKK）</option>
+        <option value="PL|PLN">波兰（PLN）</option>
+        <option value="CZ|CZK">捷克（CZK）</option>
+        <option value="HU|HUF">匈牙利（HUF）</option>
+        <option value="RO|RON">罗马尼亚（RON）</option>
+        <option value="ZA|ZAR">南非（ZAR）</option>
+        <option value="IL|ILS">以色列（ILS）</option>
+        <option value="AE|AED">阿联酋（AED）</option>
+        <option value="SA|SAR">沙特（SAR）</option>
+        <option value="QA|QAR">卡塔尔（QAR）</option>
+        <option value="CO|COP">哥伦比亚（COP）</option>
+        <option value="CL|CLP">智利（CLP）</option>
+        <option value="PE|PEN">秘鲁（PEN）</option>
+        <option value="IE|EUR">欧盟（EUR）</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="btnPayment" onclick="generatePaymentLink()">生成支付链接</button>
+    </div>
+    <div id="result-payment" class="result-panel"></div>
+  </div>
+
+  <!-- ④ F12 跳转脚本 -->
+  <div class="card">
+    <div class="card-title">④ F12 跳转脚本</div>
+    <p class="card-desc">无需提交 session。生成一段 JS，让用户在自己已登录的 ChatGPT 控制台运行，用其自身登录态生成支付页并自动跳转（更安全）。套餐/国家/货币沿用上面 ③ 的选择。</p>
+    <div class="btn-row">
+      <button class="btn-primary" id="btnF12" onclick="copyF12Script()">复制 F12 跳转脚本（套餐：Plus）</button>
+    </div>
+    <p class="hint" style="margin-top:14px">用法：复制后，让用户在已登录的 chatgpt.com 标签页按 F12 → Console 粘贴回车，会自动跳到对应套餐支付页。</p>
+    <div id="result-f12" class="result-panel"></div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ──────────────────────────────────────────────
+//  Helpers
+// ──────────────────────────────────────────────
+
+function parseSession(raw) {
+  raw = (raw || '').trim();
+  if (!raw) return null;
+  try {
+    const obj = JSON.parse(raw);
+    return {
+      accessToken:  obj.accessToken  || obj.access_token  || null,
+      sessionToken: obj.sessionToken || obj.session_token || null,
+    };
+  } catch (_) {
+    // Plain token string
+    if (raw.startsWith('eyJ')) {
+      // heuristic: session tokens are longer
+      const looksSession = raw.length > 300;
+      return {
+        accessToken:  looksSession ? null : raw,
+        sessionToken: looksSession ? raw  : null,
+      };
+    }
+    return null;
+  }
+}
+
+function getSession() {
+  return parseSession(document.getElementById('sessionInput').value);
+}
+
+function showPanel(id, type, headerText, bodyHtml, isHtml) {
+  const panel = document.getElementById(id);
+  panel.className = 'result-panel visible ' + type;
+  panel.innerHTML = `
+    <div class="result-header">
+      <span><span class="status-dot"></span>${headerText}</span>
+      <button class="btn-copy" onclick="copyPanelText('${id}')">复制</button>
+    </div>
+    <div class="result-body${isHtml ? ' result-html' : ''}" id="${id}-body">
+      ${isHtml ? bodyHtml : escHtml(bodyHtml)}
+    </div>`;
+}
+
+function showError(id, msg) {
+  showPanel(id, 'err', '错误', msg, false);
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn._orig = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner"></span>处理中…`;
+  } else {
+    btn.innerHTML = btn._orig || btn.innerHTML;
+  }
+}
+
+function copyPanelText(id) {
+  const el = document.getElementById(id + '-body');
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = el.previousElementSibling.querySelector('button');
+    if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制', 1500); }
+  });
+}
+
+function updateF12Btn() {
+  const plan = document.getElementById('planSelect');
+  const label = plan.options[plan.selectedIndex].text;
+  document.getElementById('btnF12').textContent = `复制 F12 跳转脚本（套餐：${label}）`;
+}
+
+// ──────────────────────────────────────────────
+//  ① Generate Cookie
+// ──────────────────────────────────────────────
+function generateCookie() {
+  const s = getSession();
+  if (!s) {
+    showError('result-cookie', '请先在上方输入框粘贴 session JSON 或 sessionToken。');
+    return;
+  }
+  const token = s.sessionToken || s.accessToken;
+  if (!token) {
+    showError('result-cookie', '未能识别到 sessionToken，请粘贴完整的 session JSON 或直接粘 sessionToken 字符串。');
+    return;
+  }
+
+  const exp = Math.floor(Date.now() / 1000) + 86400 * 30;
+  const cookies = [
+    {
+      "name": "__Secure-next-auth.session-token",
+      "value": token,
+      "domain": "chatgpt.com",
+      "hostOnly": false,
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "sameSite": "Lax",
+      "session": false,
+      "firstPartyDomain": "",
+      "partitionKey": null,
+      "expirationDate": exp,
+      "storeId": null
+    }
+  ];
+
+  const json = JSON.stringify(cookies, null, 2);
+  showPanel('result-cookie', 'ok', '✅ Cookie 生成成功（Cookie-Editor 格式）', json, false);
+}
+
+// ──────────────────────────────────────────────
+//  ② Query subscription
+// ──────────────────────────────────────────────
+async function querySubscription() {
+  const s = getSession();
+  if (!s || !s.accessToken) {
+    showError('result-sub', '未找到 accessToken。请粘贴包含 accessToken 的完整 session JSON。');
+    return;
+  }
+  setLoading('btnQuery', true);
+
+  try {
+    const res = await fetch('/api/gpt/subscription', {
+      headers: { 'x-access-token': s.accessToken }
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}${txt ? ': ' + txt.slice(0, 200) : ''}`);
+    }
+
+    const data = await res.json();
+    renderSubscription(data);
+  } catch (err) {
+    showError('result-sub', `请求失败：${err.message}`);
+  } finally {
+    setLoading('btnQuery', false);
+  }
+}
+
+function renderSubscription(data) {
+  const accts = data.accounts || {};
+  const rows = [];
+
+  for (const [id, acct] of Object.entries(accts)) {
+    const plan = acct.account?.plan_type || '未知';
+    const sub  = acct.account?.subscription;
+    const isFree = plan === 'chatgpt_free_2024' || plan === 'free' || !sub;
+
+    const statusLabel = isFree ? '<span class="badge free">免费版</span>'
+      : sub?.will_renew
+        ? '<span class="badge active">自动续费中</span>'
+        : '<span class="badge inactive">已取消续费</span>';
+
+    const planName = isFree ? '免费版' : (plan
+      .replace('chatgptplusplan',  'Plus ($20/月)')
+      .replace('chatgptproplan',   'Pro ($200/月)')
+      .replace('chatgptteamplan',  'Team')
+      .replace('chatgpt_free_2024','免费版')
+    );
+
+    let expireStr = '—';
+    if (sub?.expires_at) expireStr = sub.expires_at.replace('T',' ').slice(0,19) + ' UTC';
+    if (sub?.current_period_end) expireStr = new Date(sub.current_period_end * 1000).toLocaleString('zh-CN');
+
+    const seats = acct.account?.team_plan?.team_size || '—';
+    const isTeam = plan === 'chatgptteamplan';
+
+    rows.push(`
+      <tr><td>账号 ID</td><td>${id}</td></tr>
+      <tr><td>套餐</td><td>${planName}</td></tr>
+      <tr><td>续费状态</td><td>${statusLabel}</td></tr>
+      <tr><td>到期时间</td><td>${expireStr}</td></tr>
+      ${isTeam ? `<tr><td>团队席位</td><td>${seats}</td></tr>` : ''}
+    `);
+  }
+
+  if (!rows.length) {
+    // Fallback: show raw JSON
+    showPanel('result-sub', 'ok', '✅ 查询成功', JSON.stringify(data, null, 2), false);
+    return;
+  }
+
+  const tableHtml = `<table class="sub-table"><tbody>${rows.join('')}</tbody></table>`;
+  showPanel('result-sub', 'ok', '✅ 订阅信息', tableHtml, true);
+}
+
+// ──────────────────────────────────────────────
+//  ② Cancel subscription
+// ──────────────────────────────────────────────
+async function cancelSubscription() {
+  const s = getSession();
+  if (!s || !s.accessToken) {
+    showError('result-sub', '未找到 accessToken。请粘贴包含 accessToken 的完整 session JSON。');
+    return;
+  }
+
+  if (!confirm('确认取消自动续费？\n权益将保留到当前订阅到期日，到期后不再自动扣款。')) return;
+
+  setLoading('btnCancel', true);
+  try {
+    const res = await fetch('/api/gpt/cancel', {
+      method: 'POST',
+      headers: { 'x-access-token': s.accessToken }
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}${txt ? ': ' + txt.slice(0,300) : ''}`);
+    }
+    const data = await res.json().catch(() => ({}));
+    showPanel('result-sub', 'ok', '✅ 已取消自动续费',
+      `取消成功！\n\n当前订阅权益保留至到期日，到期后不再扣款。\n\n${JSON.stringify(data, null, 2)}`, false);
+  } catch (err) {
+    showError('result-sub', `取消续费失败：${err.message}`);
+  } finally {
+    setLoading('btnCancel', false);
+  }
+}
+
+// ──────────────────────────────────────────────
+//  ③ Generate payment link
+// ──────────────────────────────────────────────
+async function generatePaymentLink() {
+  const s = getSession();
+  if (!s || !s.accessToken) {
+    showError('result-payment', '未找到 accessToken。请粘贴包含 accessToken 的完整 session JSON。');
+    return;
+  }
+
+  const planEl    = document.getElementById('planSelect');
+  const countryEl = document.getElementById('countrySelect');
+  const planType  = planEl.value;
+  const planLabel = planEl.options[planEl.selectedIndex].text;
+  const [countryCode, currency] = countryEl.value.split('|');
+
+  setLoading('btnPayment', true);
+  try {
+    const res = await fetch('/api/gpt/checkout', {
+      method: 'POST',
+      headers: { 'x-access-token': s.accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan_type: planType, country_code: countryCode, currency })
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}${txt ? ': ' + txt.slice(0,300) : ''}`);
+    }
+    const data = await res.json();
+    const url = data.url || data.checkout_url || data.redirect_url || '';
+
+    if (url) {
+      showPanel('result-payment', 'ok', `✅ 支付链接（${planLabel} · ${countryEl.options[countryEl.selectedIndex].text}）`,
+        `<p style="margin-bottom:10px;font-family:inherit;font-size:.88rem;color:#5a5a5a">点击链接直接付款，或复制后发给用户：</p>
+         <div class="link-box">
+           <a href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(url)}</a>
+           <button class="btn-copy" onclick="navigator.clipboard.writeText('${escHtml(url)}').then(()=>this.textContent='已复制 ✓',setTimeout(()=>this.textContent='复制',1500))">复制</button>
+         </div>`,
+        true
+      );
+    } else {
+      showPanel('result-payment', 'info', '响应数据', JSON.stringify(data, null, 2), false);
+    }
+  } catch (err) {
+    showError('result-payment', `请求失败：${err.message}`);
+  } finally {
+    setLoading('btnPayment', false);
+  }
+}
+
+// ──────────────────────────────────────────────
+//  ④ F12 jump script
+// ──────────────────────────────────────────────
+function copyF12Script() {
+  const planEl    = document.getElementById('planSelect');
+  const countryEl = document.getElementById('countrySelect');
+  const planType  = planEl.value;
+  const planLabel = planEl.options[planEl.selectedIndex].text;
+  const [countryCode, currency] = countryEl.value.split('|');
+
+  const script = `(async()=>{const r=await fetch('/backend-api/payments/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan_type:'${planType}',country_code:'${countryCode}',currency:'${currency}'})});const d=await r.json();if(d.url){window.location.href=d.url}else{console.log('Response:',d)}})()`;
+
+  navigator.clipboard.writeText(script).then(() => {
+    showPanel('result-f12', 'ok',
+      `✅ 已复制（套餐：${planLabel}）`,
+      `脚本已复制到剪贴板。\n\n使用方式：\n1. 打开 chatgpt.com，确保已登录\n2. 按 F12 打开开发者工具\n3. 切换到 Console（控制台）标签\n4. 粘贴后按回车，将自动跳转到「${planLabel}」支付页\n\n脚本内容：\n${script}`,
+      false
+    );
+  }).catch(() => {
+    // Fallback if clipboard permission denied
+    showPanel('result-f12', 'info',
+      `F12 脚本（套餐：${planLabel}）`,
+      `请手动复制以下脚本：\n\n${script}\n\n使用方式：打开 chatgpt.com → F12 → Console → 粘贴回车`,
+      false
+    );
+  });
+}
+
+// Init
+updateF12Btn();
+</script>
+</body>
+</html>
